@@ -1,0 +1,216 @@
+<div
+  class="w-full max-w-2xl mx-auto mt-10 bg-gray-800 rounded-xl shadow-lg p-8"
+>
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-center text-blue-400 mb-2">
+      Nueva Tarea
+    </h1>
+    <p class="text-center text-gray-400 text-sm">
+      Crea una nueva tarea para organizar tu trabajo
+    </p>
+  </div>
+
+  <form
+    [formGroup]="createTaskForm"
+    (ngSubmit)="onCreateTask()"
+    class="space-y-6"
+  >
+    <!-- Campo Título -->
+    <div class="form-group">
+      <label for="title" class="label label-primary label-required"
+        >Título</label
+      >
+      <input
+        type="text"
+        id="title"
+        formControlName="title"
+        class="input input-primary"
+        [class.input-danger]="hasFieldError('title')"
+        placeholder="Describe brevemente tu tarea..."
+        maxlength="100"
+      />
+      @if (hasFieldError('title')) {
+      <span class="text-red-400 text-sm mt-1">{{
+        getFieldError("title")
+      }}</span>
+      }
+      <div class="text-xs text-gray-500 mt-1">
+        {{ createTaskForm.get("title")?.value?.length || 0 }}/100 caracteres
+      </div>
+    </div>
+
+    <!-- Campo Descripción -->
+    <div class="form-group">
+      <label for="description" class="label label-primary">Descripción</label>
+      <textarea
+        id="description"
+        formControlName="description"
+        class="textarea textarea-primary"
+        [class.textarea-danger]="hasFieldError('description')"
+        placeholder="Agrega más detalles sobre tu tarea (opcional)..."
+        rows="4"
+        maxlength="500"
+      ></textarea>
+      @if (hasFieldError('description')) {
+      <span class="text-red-400 text-sm mt-1">{{
+        getFieldError("description")
+      }}</span>
+      }
+      <div class="text-xs text-gray-500 mt-1">
+        {{ createTaskForm.get("description")?.value?.length || 0 }}/500
+        caracteres
+      </div>
+    </div>
+
+    <!-- Campo Estado -->
+    <div class="form-group">
+      <label for="status" class="label label-primary label-required"
+        >Estado Inicial</label
+      >
+      <select
+        id="status"
+        formControlName="status"
+        class="select select-primary"
+        [class.select-danger]="hasFieldError('status')"
+      >
+        @for (option of statusOptions; track option.value) {
+        <option [value]="option.value" [class]="option.color">
+          {{ option.label }}
+        </option>
+        }
+      </select>
+      @if (hasFieldError('status')) {
+      <span class="text-red-400 text-sm mt-1">{{
+        getFieldError("status")
+      }}</span>
+      }
+      <div class="text-xs text-gray-500 mt-1">
+        Puedes cambiar el estado después de crear la tarea
+      </div>
+    </div>
+
+    <!-- Preview Card -->
+    @if (createTaskForm.get('title')?.value?.trim()) {
+    <div class="bg-gray-700 rounded-lg p-4 border border-gray-600">
+      <h3 class="text-sm font-medium text-gray-300 mb-3">Vista previa:</h3>
+      <div
+        class="bg-gray-800 rounded-lg p-4 border-l-4"
+        [class]="getPreviewBorderClass()"
+      >
+        <div class="flex items-start justify-between mb-2">
+          <h4 class="font-semibold text-gray-100 truncate">
+            {{ createTaskForm.get("title")?.value }}
+          </h4>
+          <span
+            class="text-xs px-2 py-1 rounded-full ml-2"
+            [class]="getPreviewBadgeClass()"
+          >
+            {{ getSelectedStatusLabel() }}
+          </span>
+        </div>
+        @if (createTaskForm.get('description')?.value?.trim()) {
+        <p class="text-gray-300 text-sm">
+          {{ createTaskForm.get("description")?.value }}
+        </p>
+        }
+        <div class="text-xs text-gray-500 mt-2">
+          Creada: {{ getCurrentDateFormatted() }}
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Botones de Acción -->
+    <div class="flex flex-col sm:flex-row gap-3 pt-6">
+      <button
+        type="submit"
+        class="btn btn-primary flex-1 flex items-center justify-center space-x-2"
+        [disabled]="isLoading() || !createTaskForm.valid"
+      >
+        @if (isLoading()) {
+        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+        <span>Creando tarea...</span>
+        } @else {
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+          />
+        </svg>
+        <span>Crear Tarea</span>
+        }
+      </button>
+
+      <button
+        type="button"
+        (click)="onCancel()"
+        class="btn btn-outline-secondary flex-1 flex items-center justify-center space-x-2"
+        [disabled]="isLoading()"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+        <span>Cancelar</span>
+      </button>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 mt-6">
+      <div class="flex items-start space-x-3">
+        <svg
+          class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <div class="text-sm text-blue-300">
+          <p class="font-medium mb-1">Consejos para crear buenas tareas:</p>
+          <ul class="text-xs text-blue-200 space-y-1">
+            <li>• Usa títulos claros y descriptivos</li>
+            <li>• Agrega detalles específicos en la descripción</li>
+            <li>• Puedes cambiar el estado en cualquier momento</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

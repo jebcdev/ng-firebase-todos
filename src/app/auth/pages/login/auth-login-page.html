@@ -1,0 +1,70 @@
+<div class="w-full max-w-md mx-auto mt-10 bg-gray-800 rounded-xl shadow-lg p-8">
+  <h1 class="text-2xl font-bold text-center text-blue-400 mb-6">Iniciar Sesión</h1>
+  
+  <form [formGroup]="loginForm" (ngSubmit)="onEmailLogin()" class="space-y-6">
+    <!-- Campo Email -->
+    <div class="form-group">
+      <label for="email" class="label label-primary">Email</label>
+      <input
+        type="email"
+        id="email"
+        formControlName="email"
+        class="input input-primary"
+        [class.input-danger]="hasFieldError('email')"
+        placeholder="Tu correo electrónico"
+      />
+      @if (hasFieldError('email')) {
+        <span class="text-red-400 text-sm mt-1">{{ getFieldError('email') }}</span>
+      }
+    </div>
+
+    <!-- Campo Contraseña -->
+    <div class="form-group">
+      <label for="password" class="label label-primary">Contraseña</label>
+      <input
+        type="password"
+        id="password"
+        formControlName="password"
+        class="input input-primary"
+        [class.input-danger]="hasFieldError('password')"
+        placeholder="Tu contraseña"
+      />
+      @if (hasFieldError('password')) {
+        <span class="text-red-400 text-sm mt-1">{{ getFieldError('password') }}</span>
+      }
+    </div>
+
+    <!-- Botones -->
+    <div class="flex flex-col gap-3 mt-6">
+      <button 
+        type="submit" 
+        class="btn btn-primary w-full"
+        [disabled]="isLoading()"
+      >
+        @if (isLoading()) {
+          <span>Iniciando sesión...</span>
+        } @else {
+          <span>Iniciar Sesión</span>
+        }
+      </button>
+      
+      <button
+        type="button"
+        (click)="onGoogleLogin()"
+        class="btn btn-outline-primary w-full flex items-center justify-center gap-2"
+        [disabled]="isLoading()"
+      >
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M21.35 11.1h-9.17v2.92h5.27c-.23 1.22-1.39 3.59-5.27 3.59-3.17 0-5.76-2.62-5.76-5.85s2.59-5.85 5.76-5.85c1.81 0 3.02.77 3.72 1.43l2.54-2.47C16.7 3.99 14.7 3 12.18 3 6.98 3 2.82 7.16 2.82 12.01s4.16 9.01 9.36 9.01c5.39 0 8.96-3.78 8.96-9.09 0-.61-.07-1.22-.19-1.83z"
+          />
+        </svg>
+        Iniciar con Google
+      </button>
+      
+      <a href="/auth/register" class="btn btn-outline-secondary w-full text-center">
+        ¿No tienes cuenta? Regístrate
+      </a>
+    </div>
+  </form>
+</div>

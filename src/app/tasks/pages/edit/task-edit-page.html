@@ -1,0 +1,247 @@
+<div
+  class="w-full max-w-2xl mx-auto mt-10 bg-gray-800 rounded-xl shadow-lg p-8"
+>
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-center text-blue-400 mb-2">
+      Editar Tarea
+    </h1>
+    @if (currentTask()) {
+    <p class="text-center text-gray-400 text-sm">
+      Modificando: "{{ currentTask()?.title }}"
+    </p>
+    } @if (isLoadingTask()) {
+    <div class="flex items-center justify-center py-4">
+      <svg
+        class="animate-spin w-6 h-6 text-blue-500"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+      <span class="ml-2 text-gray-400">Cargando tarea...</span>
+    </div>
+    }
+  </div>
+
+  @if (!isLoadingTask() && currentTask()) {
+  <form
+    [formGroup]="editTaskForm"
+    (ngSubmit)="onUpdateTask()"
+    class="space-y-6"
+  >
+    <!-- Campo Título -->
+    <div class="form-group">
+      <label for="title" class="label label-primary label-required"
+        >Título</label
+      >
+      <input
+        type="text"
+        id="title"
+        formControlName="title"
+        class="input input-primary"
+        [class.input-danger]="hasFieldError('title')"
+        placeholder="Describe brevemente tu tarea..."
+        maxlength="100"
+      />
+      @if (hasFieldError('title')) {
+      <span class="text-red-400 text-sm mt-1">{{
+        getFieldError("title")
+      }}</span>
+      }
+      <div class="text-xs text-gray-500 mt-1">
+        {{ editTaskForm.get("title")?.value?.length || 0 }}/100 caracteres
+      </div>
+    </div>
+
+    <!-- Campo Descripción -->
+    <div class="form-group">
+      <label for="description" class="label label-primary">Descripción</label>
+      <textarea
+        id="description"
+        formControlName="description"
+        class="textarea textarea-primary"
+        [class.textarea-danger]="hasFieldError('description')"
+        placeholder="Agrega más detalles sobre tu tarea (opcional)..."
+        rows="4"
+        maxlength="500"
+      ></textarea>
+      @if (hasFieldError('description')) {
+      <span class="text-red-400 text-sm mt-1">{{
+        getFieldError("description")
+      }}</span>
+      }
+      <div class="text-xs text-gray-500 mt-1">
+        {{ editTaskForm.get("description")?.value?.length || 0 }}/500 caracteres
+      </div>
+    </div>
+
+    <!-- Campo Estado -->
+    <div class="form-group">
+      <label for="status" class="label label-primary label-required"
+        >Estado</label
+      >
+      <select
+        id="status"
+        formControlName="status"
+        class="select select-primary"
+        [class.select-danger]="hasFieldError('status')"
+      >
+        @for (option of statusOptions; track option.value) {
+        <option [value]="option.value" [class]="option.color">
+          {{ option.label }}
+        </option>
+        }
+      </select>
+      @if (hasFieldError('status')) {
+      <span class="text-red-400 text-sm mt-1">{{
+        getFieldError("status")
+      }}</span>
+      }
+      <div class="text-xs text-gray-500 mt-1">
+        Cambiar el estado afectará el progreso de la tarea
+      </div>
+    </div>
+
+    <!-- Preview Card -->
+    @if (editTaskForm.get('title')?.value?.trim()) {
+    <div class="bg-gray-700 rounded-lg p-4 border border-gray-600">
+      <h3 class="text-sm font-medium text-gray-300 mb-3">
+        Vista previa de cambios:
+      </h3>
+      <div
+        class="bg-gray-800 rounded-lg p-4 border-l-4"
+        [class]="getPreviewBorderClass()"
+      >
+        <div class="flex items-start justify-between mb-2">
+          <h4 class="font-semibold text-gray-100 truncate">
+            {{ editTaskForm.get("title")?.value }}
+          </h4>
+          <span
+            class="text-xs px-2 py-1 rounded-full ml-2"
+            [class]="getPreviewBadgeClass()"
+          >
+            {{ getSelectedStatusLabel() }}
+          </span>
+        </div>
+        @if (editTaskForm.get('description')?.value?.trim()) {
+        <p class="text-gray-300 text-sm">
+          {{ editTaskForm.get("description")?.value }}
+        </p>
+        }
+        <div class="text-xs text-gray-500 mt-2 space-y-1">
+          <div>
+            Creada: {{ currentTask()?.createdAt | date : "dd/MM/yyyy" }}
+          </div>
+          <div>Última actualización: {{ getLastUpdatedFormatted() }}</div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Botones de Acción -->
+    <div class="flex flex-col sm:flex-row gap-3 pt-6">
+      <button
+        type="submit"
+        class="btn btn-primary flex-1 flex items-center justify-center space-x-2"
+        [disabled]="isLoading() || !editTaskForm.valid"
+      >
+        @if (isLoading()) {
+        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+        <span>Actualizando tarea...</span>
+        } @else {
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          />
+        </svg>
+        <span>Actualizar Tarea</span>
+        }
+      </button>
+
+      <button
+        type="button"
+        (click)="onCancel()"
+        class="btn btn-outline-secondary flex-1 flex items-center justify-center space-x-2"
+        [disabled]="isLoading()"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+        <span>Cancelar</span>
+      </button>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="bg-green-900/20 border border-green-600/30 rounded-lg p-4 mt-6">
+      <div class="flex items-start space-x-3">
+        <svg
+          class="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          />
+        </svg>
+        <div class="text-sm text-green-300">
+          <p class="font-medium mb-1">Editando tarea existente:</p>
+          <ul class="text-xs text-green-200 space-y-1">
+            <li>• Los cambios se guardarán inmediatamente</li>
+            <li>• Puedes modificar el título, descripción y estado</li>
+            <li>• La fecha de creación se mantiene intacta</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </form>
+  }
+</div>
